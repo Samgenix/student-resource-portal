@@ -1,4 +1,4 @@
-# Student Resource Portal 
+# Student Resource Portal -Docker Starter
 
 ## Prereqs
 - Docker Desktop installed and running
