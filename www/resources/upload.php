@@ -3,13 +3,25 @@ require_once __DIR__ . '/../inc/db.php';
 require_once __DIR__ . '/../inc/auth.php';
 require_login();
 
+
+
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_FILES['file'])) {
     $title = trim($_POST['title'] ?? '');
     $desc  = trim($_POST['description'] ?? '');
+    $category_id = (int)($_POST['category_id'] ?? 0);
     $user_id = current_user_id();
 
+    $categoryStmt = $pdo->query("SELECT id, name FROM categories ORDER BY name");
+    $categories = $categoryStmt->fetchAll();
+
+   
+
     if (!$title) $errors[] = 'Title required';
+
+    if (!$category_id) {
+        $errors[] = 'Category required';
+    }
 
     $file = $_FILES['file'];
     if ($file['error'] !== UPLOAD_ERR_OK) {
@@ -26,8 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_FILES['file'])) {
             if (!is_dir(__DIR__.'/../uploads')) mkdir(__DIR__.'/../uploads', 0755, true);
 
             if (move_uploaded_file($file['tmp_name'], $dest)) {
-                $stmt = $pdo->prepare("INSERT INTO resources (user_id, title, description, filename, original_filename, file_type, file_size) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                $stmt->execute([$user_id, $title, $desc, $safe, $file['name'], $file['type'], $file['size']]);
+                $stmt = $pdo->prepare("INSERT INTO resources (user_id, category_id, title, description, filename, original_filename, file_type, file_size) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$user_id, $category_id, $title, $desc, $safe, $file['name'], $file['type'], $file['size']]);
                 header('Location: list.php?uploaded=1');
                 exit;
             } else {
@@ -46,6 +58,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_FILES['file'])) {
 <form method="post" enctype="multipart/form-data">
   <label>Title <input name="title" value="<?=htmlspecialchars($_POST['title'] ?? '')?>"></label><br>
   <label>Description <textarea name="description"><?=htmlspecialchars($_POST['description'] ?? '')?></textarea></label><br>
+  <label>Category
+  <select name="category_id">
+    <option value="">Select category</option>
+
+    <?php foreach ($categories as $category): ?>
+      <option value="<?= $category['id'] ?>">
+        <?= htmlspecialchars($category['name']) ?>
+      </option>
+    <?php endforeach; ?>
+
+  </select>
+</label>
+<br>
   <label>File <input type="file" name="file"></label><br>
   <button>Upload</button>
 </form>

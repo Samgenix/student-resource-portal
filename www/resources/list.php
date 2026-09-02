@@ -3,7 +3,7 @@ require_once __DIR__ . '/../inc/db.php';
 require_once __DIR__ . '/../inc/auth.php';
 require_login();
 
-$stmt = $pdo->query("SELECT r.*, u.name as uploader FROM resources r JOIN users u ON u.id = r.user_id ORDER BY r.created_at DESC");
+$stmt = $pdo->query("SELECT r.*, u.name AS uploader, c.name AS category FROM resources r JOIN users u ON u.id = r.user_id LEFT JOIN categories c ON c.id = r.category_id  ORDER BY r.created_at DESC");
 $resources = $stmt->fetchAll();
 ?>
 <!doctype html>
@@ -24,6 +24,7 @@ $resources = $stmt->fetchAll();
 <?php foreach ($resources as $r): ?>
   <tr>
     <td><?=htmlspecialchars($r['title'])?></td>
+    <td><?= htmlspecialchars($r['category'] ?? 'Uncategorized') ?></td>
     <td><?=htmlspecialchars($r['uploader'])?></td>
     <td>
       <?php if ($r['filename']): ?>
