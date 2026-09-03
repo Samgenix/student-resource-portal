@@ -3,28 +3,27 @@ require_once __DIR__ . '/../inc/db.php';
 require_once __DIR__ . '/../inc/auth.php';
 require_login();
 
+$categoryStmt = $pdo->query("SELECT id, name FROM categories ORDER BY name");
+$categories = $categoryStmt->fetchAll();
 
 
 $errors = [];
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_FILES['file'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim($_POST['title'] ?? '');
     $desc  = trim($_POST['description'] ?? '');
     $category_id = (int)($_POST['category_id'] ?? 0);
     $user_id = current_user_id();
-
-    $categoryStmt = $pdo->query("SELECT id, name FROM categories ORDER BY name");
-    $categories = $categoryStmt->fetchAll();
-
    
-
     if (!$title) $errors[] = 'Title required';
 
     if (!$category_id) {
         $errors[] = 'Category required';
     }
 
-    $file = $_FILES['file'];
-    if ($file['error'] !== UPLOAD_ERR_OK) {
+    $file = $_FILES['file'] ?? null;
+    if (!$file || $file['error'] === UPLOAD_ERR_NO_FILE) {
+        $errors[] = 'File required';
+    } elseif ($file['error'] !== UPLOAD_ERR_OK) {
         $errors[] = 'Upload error';
     } else {
         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
@@ -63,9 +62,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_FILES['file'])) {
     <option value="">Select category</option>
 
     <?php foreach ($categories as $category): ?>
-      <option value="<?= $category['id'] ?>">
-        <?= htmlspecialchars($category['name']) ?>
-      </option>
+      <option
+    value="<?= htmlspecialchars($category['id']) ?>"
+    <?= (($_POST['category_id'] ?? '') == $category['id']) ? 'selected' : '' ?>
+>
+    <?= htmlspecialchars($category['name']) ?>
+        </option>
     <?php endforeach; ?>
 
   </select>
