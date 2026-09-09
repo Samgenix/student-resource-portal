@@ -19,7 +19,7 @@ $resources = $stmt->fetchAll();
 <?php if (!empty($_GET['uploaded'])): ?><div style="color:green">Uploaded!</div><?php endif; ?>
 
 <table border="1" cellpadding="6" cellspacing="0">
-<thead><tr><th>Title</th><th>Uploader</th><th>File</th><th>Date</th></tr></thead>
+<thead><tr><th>Title</th><th>Category</th><th>Uploader</th><th>File</th><th>Date</th></tr></thead>
 <tbody>
 <?php foreach ($resources as $r): ?>
   <tr>

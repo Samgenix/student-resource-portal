@@ -3,4 +3,5 @@ vendor/
 **/.DS_Store
 www/uploads/*
 !www/uploads/.gitkeep
+!www/uploads/.htaccess
 db_data/

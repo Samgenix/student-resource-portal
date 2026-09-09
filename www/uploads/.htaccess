@@ -1,0 +1,4 @@
+# Uploaded files are user-supplied; never let Apache execute anything in here.
+<FilesMatch "\.(php|php[3-8]?|phtml|pht)$">
+    Require all denied
+</FilesMatch>
