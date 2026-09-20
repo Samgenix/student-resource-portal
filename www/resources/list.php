@@ -3,7 +3,32 @@ require_once __DIR__ . '/../inc/db.php';
 require_once __DIR__ . '/../inc/auth.php';
 require_login();
 
-$stmt = $pdo->query("SELECT r.*, u.name AS uploader, c.name AS category FROM resources r JOIN users u ON u.id = r.user_id LEFT JOIN categories c ON c.id = r.category_id  ORDER BY r.created_at DESC");
+$search = trim($_GET['q'] ?? '');
+$sql = "SELECT r.*, u.name AS uploader, c.name AS category
+        FROM resources r
+        JOIN users u ON u.id = r.user_id
+        LEFT JOIN categories c ON c.id = r.category_id";
+$params = [];
+
+if ($search !== '') {
+    $sql .= " WHERE r.title LIKE :title
+              OR r.description LIKE :description
+              OR r.original_filename LIKE :filename
+              OR u.name LIKE :uploader
+              OR c.name LIKE :category";
+    $searchTerm = '%' . $search . '%';
+    $params = [
+        ':title' => $searchTerm,
+        ':description' => $searchTerm,
+        ':filename' => $searchTerm,
+        ':uploader' => $searchTerm,
+        ':category' => $searchTerm,
+    ];
+}
+
+$sql .= " ORDER BY r.created_at DESC";
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
 $resources = $stmt->fetchAll();
 ?>
 <!doctype html>
@@ -17,6 +42,17 @@ $resources = $stmt->fetchAll();
   <a href="/logout.php">Logout</a>
 </p>
 <?php if (!empty($_GET['uploaded'])): ?><div style="color:green">Uploaded!</div><?php endif; ?>
+
+<form method="get" role="search">
+  <label for="resource-search">Search resources</label>
+  <input id="resource-search" type="search" name="q" value="<?=htmlspecialchars($search)?>" placeholder="Title, description, file, category, or uploader">
+  <button type="submit">Search</button>
+  <?php if ($search !== ''): ?><a href="/resources/list.php">Clear</a><?php endif; ?>
+</form>
+
+<?php if ($search !== '' && !$resources): ?>
+  <p>No resources matched &quot;<?=htmlspecialchars($search)?>&quot;.</p>
+<?php endif; ?>
 
 <table border="1" cellpadding="6" cellspacing="0">
 <thead><tr><th>Title</th><th>Category</th><th>Uploader</th><th>File</th><th>Date</th></tr></thead>
