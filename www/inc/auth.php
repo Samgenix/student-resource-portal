@@ -18,3 +18,14 @@ function require_login() {
 function current_user_id() {
     return $_SESSION['user_id'] ?? null;
 }
+
+function is_admin() {
+    return !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
+}
+
+function require_admin() {
+    if (!is_admin()) {
+        header('Location: /resources/list.php');
+        exit;
+    }
+}
