@@ -91,16 +91,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!doctype html>
 <html>
-<head><meta charset="utf-8"><title>Upload</title></head>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/assets/css/app.css">
+    <title>Upload</title>
+</head>
 <body>
-<h2>Upload Resource</h2>
-<?php foreach ($errors as $e) echo "<div style='color:red'>".htmlspecialchars($e)."</div>"; ?>
-<form id="upload-form" method="post" enctype="multipart/form-data">
+<header class="site-header"><h1>Upload Resource</h1><nav class="site-nav" aria-label="Primary navigation"><a href="/resources/list.php">Resources</a><a href="/resources/manage.php">Manage uploads</a><a href="/">Home</a><a href="/logout.php">Logout</a></nav></header>
+<main class="site-main"><section class="panel">
+<?php foreach ($errors as $e): ?><div class="message message-error" role="alert"><?=htmlspecialchars($e)?></div><?php endforeach; ?>
+<form id="upload-form" method="post" enctype="multipart/form-data" class="form-stack">
   <input type="hidden" name="MAX_FILE_SIZE" value="10485760">
-  <label>Title <input name="title" value="<?=htmlspecialchars($_POST['title'] ?? '')?>"></label><br>
-  <label>Description <textarea name="description"><?=htmlspecialchars($_POST['description'] ?? '')?></textarea></label><br>
-  <label>Category
-    <select name="category_id">
+    <div class="form-field"><label for="title">Title</label><input id="title" name="title" value="<?=htmlspecialchars($_POST['title'] ?? '')?>" required></div>
+    <div class="form-field"><label for="description">Description</label><textarea id="description" name="description"><?=htmlspecialchars($_POST['description'] ?? '')?></textarea></div>
+    <div class="form-field"><label for="category_id">Category</label>
+        <select id="category_id" name="category_id" required>
       <option value="">Select category</option>
       <?php foreach ($categories as $category): ?>
         <option value="<?= htmlspecialchars((string)$category['id']) ?>" <?= (($_POST['category_id'] ?? '') == $category['id']) ? 'selected' : '' ?>>
@@ -108,13 +114,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </option>
       <?php endforeach; ?>
     </select>
-  </label>
-  <br>
-  <label>File <input type="file" name="file"></label><br>
-    <div id="client-file-error" role="alert" style="color:red" hidden></div>
-  <button>Upload</button>
+    </select></div>
+    <div class="form-field"><label for="file">File</label><input id="file" type="file" name="file" required><div id="client-file-error" class="message message-error" role="alert" hidden></div></div>
+    <button type="submit">Upload</button>
 </form>
-<p><a href="/resources/list.php">Back to list</a></p>
+</section></main>
 <script>
 const uploadForm = document.getElementById('upload-form');
 const fileInput = uploadForm.querySelector('input[name="file"]');
